@@ -45,7 +45,17 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 };
 
 export default definePlugin((serverApi: ServerAPI) => {
-  let screenshot_register = window.SteamClient.GameSessions.RegisterForScreenshotNotification(async (data: any) => { console.log(data), console.log(await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl })) });
+  let screenshot_register = window.SteamClient.GameSessions.RegisterForScreenshotNotification(async (data: any) => {
+    let res = await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl });
+    if (res.result) {
+      await serverApi.toaster.toast({
+        title: "ShotAgg",
+        body: "Screenshot Symlinked",
+        duration: 1000,
+        critical: true
+      })
+    }
+  });
 
   return {
     title: <div className={staticClasses.Title}>Screentshot Aggregator</div>,

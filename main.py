@@ -35,6 +35,10 @@ class Plugin:
             for f in files:
                 path = Plugin.make_path(self, app_id, fname)
                 os.symlink(f, path)
+                most_recent_path = self._dump_folder / "most_recent.jpg"
+                if most_recent_path.exists():
+                    most_recent_path.unlink()
+                os.symlink(f, most_recent_path)
                 decky_plugin.logger.info(f"Symlinked {f} to {path}")
                 did = True
             return did
@@ -66,6 +70,12 @@ class Plugin:
                     final_path.unlink()
                 shutil.copy(f, final_path, follow_symlinks=False)
                 total_copied += 1
+
+        # clean up
+        for f in dump_folder.glob("**/*.jpg"):
+            if f.is_symlink() and not f.exists():
+                decky_plugin.logger.info(f"Cleaning up broken symlink {f}")
+                f.unlink()
 
         return total_copied
 
