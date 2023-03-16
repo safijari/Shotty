@@ -10,66 +10,92 @@ import os
 import subprocess
 import sys
 import shutil
-
-
-async def sdsa_classic():
-    do_copy = False
-    if len(sys.argv) > 1 and sys.argv[1] == "copy":
-        do_copy = True
-    path = Path.home() / ".local/share/Steam/userdata"
-    files = list(path.glob("**/screenshots/*.jpg"))
-
-    subprocess.run(
-        "curl https://api.steampowered.com/ISteamApps/GetAppList/v2/ > /tmp/appidmap.json",
-        shell=True,
-        check=True,
-        capture_output=True,
-    )
-
-    id_map = {
-        i["appid"]: i["name"]
-        for i in json.load(open("/tmp/appidmap.json"))["applist"]["apps"]
-    }
-
-    dump_folder = Path.home() / "Pictures" / "Screenshots"
-
-    total_copied = 0
-
-    for f in files:
-        appid = int(f.parent.parent.name)
-        name = str(id_map.get(appid, appid))
-        final_path = dump_folder / name / f.name
-        final_path.parent.mkdir(parents=True, exist_ok=True)
-        if not do_copy:
-            if not final_path.exists():
-                os.symlink(f, final_path)
-                total_copied += 1
-        else:
-            if final_path.is_symlink():
-                final_path.unlink()
-            shutil.copy(f, final_path, follow_symlinks=False)
-            total_copied += 1
-
-    return total_copied
-
+import time
 
 class Plugin:
     # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
+    _id_map = None
+    _dump_folder = Path.home() / "Pictures" / "Screenshots"
     async def aggregate_all(self):
         try:
-            res = await sdsa_classic()
-            decky_plugin.logger.debug(f"Copied {res} files")
+            res = await Plugin.sdsa_classic(self)
+            decky_plugin.logger.info(f"Copied {res} files")
+            return res
         except Exception:
             decky_plugin.logger.exception("could not")
             return -1
 
-    # Asyncio-compatible long-running code, executed in a task when the plugin is loaded
+    async def copy_screenshot(self, app_id=0, url=""):
+        try:
+            decky_plugin.logger.info(f"Copy screenshot: {app_id}, {url}")
+            path = Path.home() / ".local/share/Steam/userdata"
+            fname = url.split('/')[-1]
+            glob_pattern = f"**/760/remote/{app_id}/screenshots/{fname}"
+            decky_plugin.logger.info(glob_pattern)
+            files = list(path.glob(glob_pattern))
+            decky_plugin.logger.info(str(files))
+            did = False
+            for f in files:
+                path = Plugin.make_path(self, app_id, fname)
+                os.symlink(f, path)
+                decky_plugin.logger.info(f"Symlinked {f} to {path}")
+                did = True
+            return did
+        except Exception:
+            decky_plugin.logger.exception(f"Copy screenshot: {app_id}, {url}")
+            return False
+
+    async def sdsa_classic(self):
+        id_map = self._id_map
+        do_copy = False
+        if len(sys.argv) > 1 and sys.argv[1] == "copy":
+            do_copy = True
+        path = Path.home() / ".local/share/Steam/userdata"
+        files = list(path.glob("**/screenshots/*.jpg"))
+
+        dump_folder = self._dump_folder
+
+        total_copied = 0
+
+        for f in files:
+            app_id = int(f.parent.parent.name)
+            final_path = Plugin.make_path(self, app_id, f.name)
+            if not do_copy:
+                if not final_path.exists():
+                    os.symlink(f, final_path)
+                    total_copied += 1
+            else:
+                if final_path.is_symlink():
+                    final_path.unlink()
+                shutil.copy(f, final_path, follow_symlinks=False)
+                total_copied += 1
+
+        return total_copied
+
+    def make_path(self, app_id, fname):
+        final_path = self._dump_folder / str(self._id_map.get(app_id, app_id)) / fname
+        final_path.parent.mkdir(parents=True, exist_ok=True)
+        return final_path
+
     async def _main(self):
-        decky_plugin.logger.info("Hello World!")
+        try:
+            subprocess.run(
+                "curl https://api.steampowered.com/ISteamApps/GetAppList/v2/ > /tmp/appidmap.json",
+                shell=True,
+                check=True,
+                capture_output=True,
+            )
+            self._id_map = {
+                i["appid"]: i["name"]
+                for i in json.load(open("/tmp/appidmap.json"))["applist"]["apps"]
+            }
+        except Exception:
+            decky_plugin.logger.exception("main")
+        decky_plugin.logger.info("Initialized")
 
     # Function called first during the unload process, utilize this to handle your plugin being removed
     async def _unload(self):
-        decky_plugin.logger.info("Goodbye World!")
+        decky_plugin.logger.info("Calling unload")
         pass
 
     # # Migrations that should be performed before entering `_main()`.

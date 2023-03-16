@@ -13,66 +13,29 @@ import {
 } from "decky-frontend-lib";
 import { VFC, useState } from "react";
 import { FaShip } from "react-icons/fa";
-
 import logo from "../assets/logo.png";
 
-// interface AddMethodArgs {
-//   left: number;
-//   right: number;
-// }
-
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
-  const [buttonEnabled, setButtonEnabled] = useState<boolean>(false);
+  const [buttonEnabled, setButtonEnabled] = useState<boolean>(true);
   const [feedbackText, setFeedbackText] = useState<string>("");
 
   const onClick = async () => {
+    setButtonEnabled(false);
+    setFeedbackText("Aggregating...");
     const result = await serverAPI.callPluginMethod(
-      "aggregate_all",{});
-    setFeedbackText("Copied " + result.result + " files");
-    // if (result.success) {
-    //   setResult(result.result);
-    // }
+      "aggregate_all", {});
+    if (result.result >= 0) {
+      setFeedbackText("Copied " + result.result + " files");
+    } else {
+      setFeedbackText("Something went wrong during aggregation. Please check logs.");
+    }
+    setButtonEnabled(true);
   };
 
   return (
     <PanelSection title="Panel Section">
-      {/* <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={(e) =>
-            showContextMenu(
-              <Menu label="Menu" cancelText="CAAAANCEL" onCancel={() => {}}>
-                <MenuItem onSelected={() => {}}>Item #1</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #2</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #3</MenuItem>
-              </Menu>,
-              e.currentTarget ?? window
-            )
-          }
-        >
-          Server says yolo
-        </ButtonItem>
-      </PanelSectionRow>
-
       <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            Router.CloseSideMenus();
-            Router.Navigate("/decky-plugin-test");
-          }}
-        >
-          Router
-        </ButtonItem>
-      </PanelSectionRow> */}
-      <PanelSectionRow>
-        <ButtonItem layout="below" onClick={onClick}>Aggregate!</ButtonItem>
+        <ButtonItem layout="below" onClick={onClick} disabled={!buttonEnabled}>Aggregate!</ButtonItem>
       </PanelSectionRow>
       <PanelSectionRow>
         <div>{feedbackText}</div>
@@ -81,28 +44,15 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   );
 };
 
-// const DeckyPluginRouterTest: VFC = () => {
-//   return (
-//     <div style={{ marginTop: "50px", color: "white" }}>
-//       Hello World!
-//       <DialogButton onClick={() => Router.NavigateToLibraryTab()}>
-//         Go to Library
-//       </DialogButton>
-//     </div>
-//   );
-// };
-
 export default definePlugin((serverApi: ServerAPI) => {
-  // serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
-  //   exact: true,
-  // });
+  let screenshot_register = window.SteamClient.GameSessions.RegisterForScreenshotNotification(async (data: any) => { console.log(data), console.log(await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl })) });
 
   return {
     title: <div className={staticClasses.Title}>Screentshot Aggregator</div>,
     content: <Content serverAPI={serverApi} />,
     icon: <FaShip />,
     onDismount() {
-      // serverApi.routerHook.removeRoute("/decky-plugin-test");
+      screenshot_register.unregister();
     },
   };
 });
