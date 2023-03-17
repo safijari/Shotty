@@ -10,6 +10,7 @@ import {
   ServerAPI,
   showContextMenu,
   staticClasses,
+  SteamClient,
 } from "decky-frontend-lib";
 import { VFC, useState } from "react";
 import { FaShip } from "react-icons/fa";
@@ -32,6 +33,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     setButtonEnabled(true);
   };
 
+  console.log(Router);
+
   return (
     <PanelSection title="Panel Section">
       <PanelSectionRow>
@@ -46,6 +49,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
 export default definePlugin((serverApi: ServerAPI) => {
   let screenshot_register = window.SteamClient.GameSessions.RegisterForScreenshotNotification(async (data: any) => {
+    console.log(data);
+    console.log(await window.appStore.GetAppOverviewByAppID(data.unAppId));
     let res = await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl });
     if (res.result) {
       await serverApi.toaster.toast({

@@ -9,10 +9,22 @@ import sys
 import shutil
 import time
 
+
+try:
+    out_path = str(Path(decky_plugin.DECKY_PLUGIN_DIR) / "backend" / "out" / "vdf")
+    if out_path not in sys.path:
+        sys.path.append(out_path)
+    import vdf
+
+    decky_plugin.logger.info("Successfully loaded vdf library")
+except Exception:
+    decky_plugin.logger.exception("Could not load vdf library")
+
+
 class Plugin:
-    # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
     _id_map = None
     _dump_folder = Path.home() / "Pictures" / "Screenshots"
+
     async def aggregate_all(self):
         try:
             res = await Plugin.sdsa_classic(self)
@@ -26,7 +38,7 @@ class Plugin:
         try:
             decky_plugin.logger.info(f"Copy screenshot: {app_id}, {url}")
             path = Path.home() / ".local/share/Steam/userdata"
-            fname = url.split('/')[-1]
+            fname = url.split("/")[-1]
             glob_pattern = f"**/760/remote/{app_id}/screenshots/{fname}"
             decky_plugin.logger.info(glob_pattern)
             files = list(path.glob(glob_pattern))
@@ -47,11 +59,10 @@ class Plugin:
             return False
 
     async def sdsa_classic(self):
-        id_map = self._id_map
         do_copy = False
         if len(sys.argv) > 1 and sys.argv[1] == "copy":
             do_copy = True
-        path = Path.home() / ".local/share/Steam/userdata"
+        path = Path(decky_plugin.DECKY_USER_HOME) / ".local/share/Steam/userdata"
         files = list(path.glob("**/screenshots/*.jpg"))
 
         dump_folder = self._dump_folder
@@ -80,57 +91,34 @@ class Plugin:
         return total_copied
 
     def make_path(self, app_id, fname):
-        final_path = self._dump_folder / str(self._id_map.get(app_id, app_id)) / fname
+        final_path = self._dump_folder / str(self._id_map.get(str(app_id), app_id)) / fname
         final_path.parent.mkdir(parents=True, exist_ok=True)
         return final_path
 
     async def _main(self):
         try:
-            subprocess.run(
-                "curl https://api.steampowered.com/ISteamApps/GetAppList/v2/ > /tmp/appidmap.json",
-                shell=True,
-                check=True,
-                capture_output=True,
-            )
+            decky_plugin.logger.info("Loading appid translations")
             self._id_map = {
-                i["appid"]: i["name"]
-                for i in json.load(open("/tmp/appidmap.json"))["applist"]["apps"]
+                str(i["appid"]): i["name"]
+                for i in json.load(open(Path(decky_plugin.DECKY_PLUGIN_DIR) / "assets" / "appidmap.json"))["applist"][
+                    "apps"
+                ]
             }
+            decky_plugin.logger.info("Loading appid translations for nonsteam games")
+            for shortcut_file in (Path(decky_plugin.DECKY_USER_HOME) / ".local" / "share" / "Steam" / "userdata").glob(
+                "**/shortcuts.vdf"
+            ):
+                for item in vdf.binary_load(open(shortcut_file, "rb"))["shortcuts"].values():
+                    if "appid" not in item:
+                        continue
+                    decky_plugin.logger.info(str(item))
+                    self._id_map[str(item["appid"])] = item["AppName"]
+
+            decky_plugin.logger.info("Initialized")
         except Exception:
             decky_plugin.logger.exception("main")
-        decky_plugin.logger.info("Initialized")
 
     # Function called first during the unload process, utilize this to handle your plugin being removed
     async def _unload(self):
         decky_plugin.logger.info("Calling unload")
         pass
-
-    # # Migrations that should be performed before entering `_main()`.
-    # async def _migration(self):
-    #     decky_plugin.logger.info("Migrating")
-    #     # Here's a migration example for logs:
-    #     # - `~/.config/decky-template/template.log` will be migrated to `decky_plugin.DECKY_PLUGIN_LOG_DIR/template.log`
-    #     decky_plugin.migrate_logs(
-    #         os.path.join(
-    #             decky_plugin.DECKY_USER_HOME,
-    #             ".config",
-    #             "decky-template",
-    #             "template.log",
-    #         )
-    #     )
-    #     # Here's a migration example for settings:
-    #     # - `~/homebrew/settings/template.json` is migrated to `decky_plugin.DECKY_PLUGIN_SETTINGS_DIR/template.json`
-    #     # - `~/.config/decky-template/` all files and directories under this root are migrated to `decky_plugin.DECKY_PLUGIN_SETTINGS_DIR/`
-    #     decky_plugin.migrate_settings(
-    #         os.path.join(decky_plugin.DECKY_HOME, "settings", "template.json"),
-    #         os.path.join(decky_plugin.DECKY_USER_HOME, ".config", "decky-template"),
-    #     )
-    #     # Here's a migration example for runtime data:
-    #     # - `~/homebrew/template/` all files and directories under this root are migrated to `decky_plugin.DECKY_PLUGIN_RUNTIME_DIR/`
-    #     # - `~/.local/share/decky-template/` all files and directories under this root are migrated to `decky_plugin.DECKY_PLUGIN_RUNTIME_DIR/`
-    #     decky_plugin.migrate_runtime(
-    #         os.path.join(decky_plugin.DECKY_HOME, "template"),
-    #         os.path.join(
-    #             decky_plugin.DECKY_USER_HOME, ".local", "share", "decky-template"
-    #         ),
-    #     )
