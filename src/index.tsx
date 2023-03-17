@@ -49,7 +49,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     let res = await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl });
     if (res.result) {
       await serverApi.toaster.toast({
-        title: "ShotAgg",
+        title: "Shotty",
         body: "Screenshot Symlinked",
         duration: 1000,
         critical: true

@@ -1,5 +1,5 @@
 {
-  "name": "ShotAgg",
+  "name": "Shotty",
   "version": "0.0.1",
   "description": "A plugin for copying over screenshots to the Pictures folder",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/safijari/ShotAgg"
+    "url": "git+https://github.com/safijari/Shotty"
   },
   "keywords": [
     "decky",
@@ -21,9 +21,9 @@
   "author": "Jonas Dellinger <jonas@dellinger.dev>",
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/safijari/ShotAgg/issues"
+    "url": "https://github.com/safijari/Shotty/issues"
   },
-  "homepage": "https://github.com/safijari/ShotAgg#readme",
+  "homepage": "https://github.com/safijari/Shotty#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^21.1.0",
     "@rollup/plugin-json": "^4.1.0",
