@@ -41,7 +41,7 @@ build-back: ## Build backend
 	@make -C ./backend
 
 build: ## Build everything
-	@$(MAKE) build-front build-back
+	@$(MAKE) build-front
 
 copy-ssh-key: ## Copy public ssh key to steamdeck
 	@echo "+ $@"

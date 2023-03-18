@@ -46,12 +46,11 @@ class Plugin:
             did = False
             for f in files:
                 path = Plugin.make_path(self, app_id, fname)
-                os.symlink(f, path)
+                # os.symlink(f, path)
+                shutil.copy(f, path, follow_symlinks=False)
                 most_recent_path = self._dump_folder / "most_recent.jpg"
-                if most_recent_path.exists():
-                    most_recent_path.unlink()
-                os.symlink(f, most_recent_path)
-                decky_plugin.logger.info(f"Symlinked {f} to {path}")
+                shutil.copy(f, most_recent_path, follow_symlinks=False)
+                decky_plugin.logger.info(f"Copied {f} to {path}")
                 did = True
             return did
         except Exception:
@@ -60,9 +59,7 @@ class Plugin:
 
     async def sdsa_classic(self):
         id_map = self._id_map
-        do_copy = False
-        if len(sys.argv) > 1 and sys.argv[1] == "copy":
-            do_copy = True
+        do_copy = True
         path = Path.home() / ".local/share/Steam/userdata"
         files = list(path.glob("**/screenshots/*.jpg"))
 
