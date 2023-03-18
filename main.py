@@ -102,7 +102,7 @@ class Plugin:
         for _id, name in self._id_map_frontend.items():
             if bin(_id).endswith(bin(app_id)[2:]):
                 self._trunc_id_map[app_id] = name
-                decky_plugin.logger.log(f"Found name of {app_id} to be {name}")
+                decky_plugin.logger.info(f"Found name of {app_id} to be {name}")
                 return name
             
 
