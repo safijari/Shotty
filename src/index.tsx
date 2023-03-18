@@ -23,7 +23,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     setButtonEnabled(false);
     setFeedbackText("Aggregating...");
     const result = await serverAPI.callPluginMethod(
-      "aggregate_all", {});
+      "aggregate_all", { allapps: window.appStore.allApps.map((i: any) => [i.appid, i.display_name])});
     if (result.result >= 0) {
       setFeedbackText("Copied " + result.result + " files");
     } else {
@@ -31,6 +31,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     }
     setButtonEnabled(true);
   };
+
+  console.log("router");
+  console.log(Router);
 
   return (
     <PanelSection title="Panel Section">
@@ -45,8 +48,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 };
 
 export default definePlugin((serverApi: ServerAPI) => {
+  serverApi.callPluginMethod("set_id_map_fronend", {allapps: window.appStore.allApps.map((i: any) => [i.appid, i.display_name])});
   let screenshot_register = window.SteamClient.GameSessions.RegisterForScreenshotNotification(async (data: any) => {
-    let res = await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl });
+    let res = await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl});
     if (res.result) {
       await serverApi.toaster.toast({
         title: "Shotty",

@@ -1,5 +1,7 @@
 import os
 
+from click import get_app_dir
+
 import decky_plugin
 from pathlib import Path
 import json
@@ -11,9 +13,14 @@ import time
 
 class Plugin:
     # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
-    _id_map = None
+    _id_map = {}
+    _id_map_frontend = {}
+    _trunc_id_map = {}
     _dump_folder = Path.home() / "Pictures" / "Screenshots"
-    async def aggregate_all(self):
+    async def aggregate_all(self, allapps):
+        self._id_map_frontend = {
+            a[0]: a[1] for a in allapps
+        }
         try:
             res = await Plugin.sdsa_classic(self)
             decky_plugin.logger.info(f"Copied {res} files")
@@ -21,6 +28,12 @@ class Plugin:
         except Exception:
             decky_plugin.logger.exception("could not")
             return -1
+
+    async def set_id_map_fronend(self, allapps):
+        decky_plugin.logger.info("Setting frontend id map")
+        self._id_map_frontend = {
+            a[0]: a[1] for a in allapps
+        }
 
     async def copy_screenshot(self, app_id=0, url=""):
         try:
@@ -79,8 +92,25 @@ class Plugin:
 
         return total_copied
 
+    def get_app_name(self, app_id):
+        if app_id in self._id_map_frontend:
+            return self._id_map_frontend[app_id]
+        if app_id in self._id_map:
+            return self._id_map[app_id]
+        # At this point we probably have a non-steam app, where the ID in the screenshot is sent back wrong
+        if app_id in self._trunc_id_map:
+            return self._trunc_id_map[app_id]
+        for trunc_len in [25, 26, 27, 28, 29, 30, 31, 32]:
+            for _id, name in self._id_map_frontend:
+                if int(bin(_id)[-trunc_len:], 2) == app_id:
+                    self._trunc_id_map[app_id] = name
+                    decky_plugin.logger.log(f"Found name of {app_id} to be {name}")
+                    return name
+            
+
     def make_path(self, app_id, fname):
-        final_path = self._dump_folder / str(self._id_map.get(app_id, app_id)) / fname
+        app_name = Plugin.get_app_name(self, app_id) or str(app_id)
+        final_path = self._dump_folder / app_name / fname
         final_path.parent.mkdir(parents=True, exist_ok=True)
         return final_path
 
