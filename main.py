@@ -29,8 +29,8 @@ class Plugin:
             return -1
 
     async def set_id_map_fronend(self, allapps):
-        decky_plugin.logger.info("Setting frontend id map")
         self._id_map_frontend = {a[0]: a[1] for a in allapps}
+        decky_plugin.logger.info("Set frontend id map")
 
     async def copy_screenshot(self, app_id=0, url=""):
         try:
@@ -102,7 +102,7 @@ class Plugin:
         try:
             decky_plugin.logger.info("Loading appid translations")
             self._id_map = {
-                str(i["appid"]): i["name"]
+                i["appid"]: i["name"]
                 for i in json.load(
                     open(
                         Path(decky_plugin.DECKY_PLUGIN_DIR) / "assets" / "appidmap.json"
