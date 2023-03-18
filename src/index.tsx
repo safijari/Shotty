@@ -12,7 +12,7 @@ import {
   staticClasses,
 } from "decky-frontend-lib";
 import { VFC, useState } from "react";
-import { FaShip } from "react-icons/fa";
+import { HiOutlineCamera } from "react-icons/fa";
 import logo from "../assets/logo.png";
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
@@ -64,7 +64,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>Screentshot Aggregator</div>,
     content: <Content serverAPI={serverApi} />,
-    icon: <FaShip />,
+    icon: <HiOutlineCamera />,
     onDismount() {
       screenshot_register.unregister();
     },
