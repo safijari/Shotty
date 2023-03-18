@@ -10,16 +10,16 @@ import sys
 import shutil
 import time
 
+
 class Plugin:
     # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
     _id_map = {}
     _id_map_frontend = {}
     _trunc_id_map = {}
     _dump_folder = Path.home() / "Pictures" / "Screenshots"
+
     async def aggregate_all(self, allapps):
-        self._id_map_frontend = {
-            a[0]: a[1] for a in allapps
-        }
+        self._id_map_frontend = {a[0]: a[1] for a in allapps}
         try:
             res = await Plugin.sdsa_classic(self)
             decky_plugin.logger.info(f"Copied {res} files")
@@ -30,15 +30,13 @@ class Plugin:
 
     async def set_id_map_fronend(self, allapps):
         decky_plugin.logger.info("Setting frontend id map")
-        self._id_map_frontend = {
-            a[0]: a[1] for a in allapps
-        }
+        self._id_map_frontend = {a[0]: a[1] for a in allapps}
 
     async def copy_screenshot(self, app_id=0, url=""):
         try:
             decky_plugin.logger.info(f"Copy screenshot: {app_id}, {url}")
             path = Path.home() / ".local/share/Steam/userdata"
-            fname = url.split('/')[-1]
+            fname = url.split("/")[-1]
             glob_pattern = f"**/760/remote/{app_id}/screenshots/{fname}"
             decky_plugin.logger.info(glob_pattern)
             files = list(path.glob(glob_pattern))
@@ -93,7 +91,6 @@ class Plugin:
                 self._trunc_id_map[app_id] = name
                 decky_plugin.logger.info(f"Found name of {app_id} to be {name}")
                 return name
-            
 
     def make_path(self, app_id, fname):
         app_name = Plugin.get_app_name(self, app_id) or str(app_id)
@@ -103,14 +100,31 @@ class Plugin:
 
     async def _main(self):
         try:
+            decky_plugin.logger.info("Loading appid translations")
             self._id_map = {
-                i["appid"]: i["name"]
-                for i in json.load(open("/tmp/appidmap.json"))["applist"]["apps"]
+                str(i["appid"]): i["name"]
+                for i in json.load(
+                    open(
+                        Path(decky_plugin.DECKY_PLUGIN_DIR) / "assets" / "appidmap.json"
+                    )
+                )["applist"]["apps"]
             }
+            decky_plugin.logger.info("Loading appid translations for nonsteam games")
+            for shortcut_file in (
+                Path(decky_plugin.DECKY_USER_HOME)
+                / ".local"
+                / "share"
+                / "Steam"
+                / "userdata"
+            ).glob("**/shortcuts.vdf"):
+                for item in vdf.binary_load(open(shortcut_file, "rb"))[
+                    "shortcuts"
+                ].values():
+                    if "appid" not in item:
+                        continue
+                    decky_plugin.logger.info(str(item))
+                    self._id_map[str(item["appid"])] = item["AppName"]
+
+            decky_plugin.logger.info("Initialized")
         except Exception:
             decky_plugin.logger.exception("main")
-        decky_plugin.logger.info("Initialized")
-
-    async def _unload(self):
-        decky_plugin.logger.info("Calling unload")
-        pass
