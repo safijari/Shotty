@@ -6,6 +6,8 @@ This is a plugin for the the Steam Deck that uses Decky (Plugin) Loader. It cont
 1. A way to bring all screenshots on your Deck to the `~/Pictures/Screenshots` folder (use the `Aggregate` button)
 2. A background service to copy any new screenshots you take after installing the plugin.
 
+Note that "copy" here means making a hardlink, so even though the files will behave like normal files, they won't take up any more hard drive space.
+
 You can then copy these files over ssh or using DeckMTP. I personally use CX File Explorer on my phone.
 
 The screenshots are categorized under separate folders for each app. For Steam native apps the folder will have the same name as the app

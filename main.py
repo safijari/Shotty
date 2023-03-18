@@ -10,16 +10,16 @@ import sys
 import shutil
 import time
 
+
 class Plugin:
     # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
     _id_map = {}
     _id_map_frontend = {}
     _trunc_id_map = {}
     _dump_folder = Path.home() / "Pictures" / "Screenshots"
+
     async def aggregate_all(self, allapps):
-        self._id_map_frontend = {
-            a[0]: a[1] for a in allapps
-        }
+        self._id_map_frontend = {a[0]: a[1] for a in allapps}
         try:
             res = await Plugin.sdsa_classic(self)
             decky_plugin.logger.info(f"Copied {res} files")
@@ -29,16 +29,14 @@ class Plugin:
             return -1
 
     async def set_id_map_fronend(self, allapps):
-        decky_plugin.logger.info("Setting frontend id map")
-        self._id_map_frontend = {
-            a[0]: a[1] for a in allapps
-        }
+        self._id_map_frontend = {a[0]: a[1] for a in allapps}
+        decky_plugin.logger.info("Set frontend id map")
 
     async def copy_screenshot(self, app_id=0, url=""):
         try:
             decky_plugin.logger.info(f"Copy screenshot: {app_id}, {url}")
             path = Path.home() / ".local/share/Steam/userdata"
-            fname = url.split('/')[-1]
+            fname = url.split("/")[-1]
             glob_pattern = f"**/760/remote/{app_id}/screenshots/{fname}"
             decky_plugin.logger.info(glob_pattern)
             files = list(path.glob(glob_pattern))
@@ -46,10 +44,9 @@ class Plugin:
             did = False
             for f in files:
                 path = Plugin.make_path(self, app_id, fname)
-                # os.symlink(f, path)
-                shutil.copy(f, path, follow_symlinks=False)
+                os.link(f, path)
                 most_recent_path = self._dump_folder / "most_recent.jpg"
-                shutil.copy(f, most_recent_path, follow_symlinks=False)
+                os.link(f, most_recent_path)
                 decky_plugin.logger.info(f"Copied {f} to {path}")
                 did = True
             return did
@@ -59,7 +56,6 @@ class Plugin:
 
     async def sdsa_classic(self):
         id_map = self._id_map
-        do_copy = True
         path = Path.home() / ".local/share/Steam/userdata"
         files = list(path.glob("**/screenshots/*.jpg"))
 
@@ -70,16 +66,9 @@ class Plugin:
         for f in files:
             app_id = int(f.parent.parent.name)
             final_path = Plugin.make_path(self, app_id, f.name)
-            if not do_copy:
-                if not final_path.exists():
-                    os.symlink(f, final_path)
-                    total_copied += 1
-            else:
-                if final_path.is_symlink():
-                    final_path.unlink()
-                if not final_path.exists():
-                    shutil.copy(f, final_path, follow_symlinks=False)
-                    total_copied += 1
+            if not final_path.exists():
+                os.link(f, final_path)
+                total_copied += 1
 
         # clean up
         for f in dump_folder.glob("**/*.jpg"):
@@ -102,7 +91,6 @@ class Plugin:
                 self._trunc_id_map[app_id] = name
                 decky_plugin.logger.info(f"Found name of {app_id} to be {name}")
                 return name
-            
 
     def make_path(self, app_id, fname):
         app_name = Plugin.get_app_name(self, app_id) or str(app_id)
@@ -112,20 +100,15 @@ class Plugin:
 
     async def _main(self):
         try:
-            subprocess.run(
-                "curl https://api.steampowered.com/ISteamApps/GetAppList/v2/ > /tmp/appidmap.json",
-                shell=True,
-                check=True,
-                capture_output=True,
-            )
+            decky_plugin.logger.info("Loading appid translations")
             self._id_map = {
                 i["appid"]: i["name"]
-                for i in json.load(open("/tmp/appidmap.json"))["applist"]["apps"]
+                for i in json.load(
+                    open(
+                        Path(decky_plugin.DECKY_PLUGIN_DIR) / "assets" / "appidmap.json"
+                    )
+                )["applist"]["apps"]
             }
+            decky_plugin.logger.info("Initialized")
         except Exception:
             decky_plugin.logger.exception("main")
-        decky_plugin.logger.info("Initialized")
-
-    async def _unload(self):
-        decky_plugin.logger.info("Calling unload")
-        pass
