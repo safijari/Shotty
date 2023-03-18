@@ -109,22 +109,6 @@ class Plugin:
                     )
                 )["applist"]["apps"]
             }
-            decky_plugin.logger.info("Loading appid translations for nonsteam games")
-            for shortcut_file in (
-                Path(decky_plugin.DECKY_USER_HOME)
-                / ".local"
-                / "share"
-                / "Steam"
-                / "userdata"
-            ).glob("**/shortcuts.vdf"):
-                for item in vdf.binary_load(open(shortcut_file, "rb"))[
-                    "shortcuts"
-                ].values():
-                    if "appid" not in item:
-                        continue
-                    decky_plugin.logger.info(str(item))
-                    self._id_map[str(item["appid"])] = item["AppName"]
-
             decky_plugin.logger.info("Initialized")
         except Exception:
             decky_plugin.logger.exception("main")
