@@ -12,7 +12,7 @@ import {
   staticClasses,
 } from "decky-frontend-lib";
 import { VFC, useState } from "react";
-import { HiOutlineCamera } from "react-icons/fa";
+import { HiOutlineCamera } from "react-icons/hi";
 import logo from "../assets/logo.png";
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
