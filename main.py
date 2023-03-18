@@ -46,10 +46,9 @@ class Plugin:
             did = False
             for f in files:
                 path = Plugin.make_path(self, app_id, fname)
-                # os.symlink(f, path)
-                shutil.copy(f, path, follow_symlinks=False)
+                os.link(f, path)
                 most_recent_path = self._dump_folder / "most_recent.jpg"
-                shutil.copy(f, most_recent_path, follow_symlinks=False)
+                os.link(f, most_recent_path)
                 decky_plugin.logger.info(f"Copied {f} to {path}")
                 did = True
             return did
@@ -59,7 +58,6 @@ class Plugin:
 
     async def sdsa_classic(self):
         id_map = self._id_map
-        do_copy = True
         path = Path.home() / ".local/share/Steam/userdata"
         files = list(path.glob("**/screenshots/*.jpg"))
 
@@ -70,16 +68,9 @@ class Plugin:
         for f in files:
             app_id = int(f.parent.parent.name)
             final_path = Plugin.make_path(self, app_id, f.name)
-            if not do_copy:
-                if not final_path.exists():
-                    os.symlink(f, final_path)
-                    total_copied += 1
-            else:
-                if final_path.is_symlink():
-                    final_path.unlink()
-                if not final_path.exists():
-                    shutil.copy(f, final_path, follow_symlinks=False)
-                    total_copied += 1
+            if not final_path.exists():
+                os.link(f, final_path)
+                total_copied += 1
 
         # clean up
         for f in dump_folder.glob("**/*.jpg"):
@@ -112,12 +103,6 @@ class Plugin:
 
     async def _main(self):
         try:
-            subprocess.run(
-                "curl https://api.steampowered.com/ISteamApps/GetAppList/v2/ > /tmp/appidmap.json",
-                shell=True,
-                check=True,
-                capture_output=True,
-            )
             self._id_map = {
                 i["appid"]: i["name"]
                 for i in json.load(open("/tmp/appidmap.json"))["applist"]["apps"]
