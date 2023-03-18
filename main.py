@@ -77,8 +77,9 @@ class Plugin:
             else:
                 if final_path.is_symlink():
                     final_path.unlink()
-                shutil.copy(f, final_path, follow_symlinks=False)
-                total_copied += 1
+                if not final_path.exists():
+                    shutil.copy(f, final_path, follow_symlinks=False)
+                    total_copied += 1
 
         # clean up
         for f in dump_folder.glob("**/*.jpg"):
