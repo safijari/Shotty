@@ -105,7 +105,7 @@ class Plugin:
                 i["appid"]: i["name"]
                 for i in json.load(
                     open(
-                        Path(decky_plugin.DECKY_PLUGIN_DIR) / "assets" / "appidmap.json"
+                        Path(decky_plugin.DECKY_PLUGIN_DIR) / "appidmap.json"
                     )
                 )["applist"]["apps"]
             }
