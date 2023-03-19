@@ -5,6 +5,6 @@
   "publish": {
     "tags": ["screenshots"],
     "description": "A plugin for copying over screenshots to the Pictures folder",
-    "image": "https://opengraph.githubassets.com/1/SteamDeckHomebrew/PluginLoader"
+    "image": "https://github.com/safijari/Shotty/raw/main/shotty-screenshot.png"
   }
 }
