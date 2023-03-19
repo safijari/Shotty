@@ -1,5 +1,7 @@
 # Shotty: Local Screenshot Aggregator for The Steam Deck
 
+![Shotty Example Screenshot](shotty-screenshot.png)
+
 ## What?
 This is a plugin for the the Steam Deck that uses Decky (Plugin) Loader. It contains two functions:
 
