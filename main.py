@@ -46,6 +46,8 @@ class Plugin:
                 path = Plugin.make_path(self, app_id, fname)
                 os.link(f, path)
                 most_recent_path = self._dump_folder / "most_recent.jpg"
+                if most_recent_path.exists():
+                    most_recent_path.unlink()
                 os.link(f, most_recent_path)
                 decky_plugin.logger.info(f"Copied {f} to {path}")
                 did = True
