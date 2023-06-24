@@ -23,13 +23,13 @@ class Plugin:
 
     @asyncio.coroutine
     async def screenshot_rescuer(self):
-        logger.info("Rescuer started")
+        decky_plugin.logger.info("Rescuer started")
         while True:
             try:
-                logger.info("in the thingie")
+                decky_plugin.logger.info("in the thingie " + Plugin._current_app_name)
             except Exception:
-                logger.exception("watchdog")
-            await asyncio.sleep(5)
+                decky_plugin.logger.exception("watchdog")
+            await asyncio.sleep(1)
 
     async def aggregate_all(self, allapps):
         self._id_map_frontend = {a[0]: a[1] for a in allapps}
@@ -42,6 +42,7 @@ class Plugin:
             return -1
 
     async def set_current_app_name(self, app_name):
+        decky_plugin.logger.info("setting app name to " + app_name)
         Plugin._current_app_name = app_name
 
     async def set_id_map_fronend(self, allapps):
@@ -117,10 +118,9 @@ class Plugin:
         return final_path
 
     async def _main(self):
-        loop = asyncio.get_event_loop()
-        self._watchdog_task = loop.create_task(Plugin.screenshot_rescuer(self))
-
         try:
+            loop = asyncio.get_event_loop()
+            Plugin._rescuer_task = loop.create_task(Plugin.screenshot_rescuer(self))
             decky_plugin.logger.info("Loading appid translations")
             self._id_map = {
                 i["appid"]: i["name"]

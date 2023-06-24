@@ -77,8 +77,13 @@ export default definePlugin((serverApi: ServerAPI) => {
           setTimeout(() => {
             (Router as any).EnableHomeAndQuickAccessButtons();
           }, 1000);
-          await serverApi.callPluginMethod("set_current_app_name", { app_name: Router.MainRunningApp?.display_name})
-          console.log("in shortcut");
+          let app_name = Router.MainRunningApp?.display_name;
+          if (!app_name) {
+            app_name = "Steam Client";
+          }
+          await serverApi.callPluginMethod("set_current_app_name", { app_name: app_name})
+          console.log("in shortcut and set app name to " + app_name);
+          console.log(app_name);
         }
       }
   });
