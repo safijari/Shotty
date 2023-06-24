@@ -11,7 +11,6 @@ import shutil
 import time
 import asyncio
 
-
 class Plugin:
     # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
     _id_map = {}
@@ -23,13 +22,24 @@ class Plugin:
 
     @asyncio.coroutine
     async def screenshot_rescuer(self):
+        png_path = "/tmp/gamescope.raw_encoded.png"
+        raw_path = "/tmp/gamescope.raw"
         decky_plugin.logger.info("Rescuer started")
         while True:
             try:
-                decky_plugin.logger.info("in the thingie " + Plugin._current_app_name)
+                if os.path.exists(png_path):
+                    dt = time.time() - os.path.getmtime(png_path)
+                    if dt > 2:
+                        path = Plugin._dump_folder / Plugin._current_app_name / (str(int(time.time())) + ".png")
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy(png_path, path)
+                        shutil.copy(png_path, self._dump_folder / "most_recent.jpg")
+                        os.unlink(png_path)
+                        os.unlink(raw_path)
+                        decky_plugin.logger.info(f"Rescued screenshot for {Plugin._current_app_name}")
             except Exception:
                 decky_plugin.logger.exception("watchdog")
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
 
     async def aggregate_all(self, allapps):
         self._id_map_frontend = {a[0]: a[1] for a in allapps}

@@ -69,9 +69,6 @@ export default definePlugin((serverApi: ServerAPI) => {
       L5 15
       R5 16*/
       for (const inputs of val) {
-        if (Date.now() - this.pressedAt < 2000) {
-          continue;
-        }
         if (inputs.ulButtons && inputs.ulButtons & (1 << 13) && inputs.ulButtons & (1 << 2)) {
           (Router as any).DisableHomeAndQuickAccessButtons();
           setTimeout(() => {
