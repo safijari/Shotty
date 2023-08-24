@@ -19,8 +19,8 @@ class Plugin:
     _dump_folder = Path.home() / "Pictures" / "Screenshots"
     _rescuer_task = None
     _current_app_name = "Unknown"
+    _rescued = False
 
-    @asyncio.coroutine
     async def screenshot_rescuer(self):
         png_path = "/tmp/gamescope.raw_encoded.png"
         raw_path = "/tmp/gamescope.raw"
@@ -37,6 +37,7 @@ class Plugin:
                         os.unlink(png_path)
                         os.unlink(raw_path)
                         decky_plugin.logger.info(f"Rescued screenshot for {Plugin._current_app_name}")
+                        Plugin._rescued = True
             except Exception:
                 decky_plugin.logger.exception("watchdog")
             await asyncio.sleep(0.5)
@@ -50,6 +51,12 @@ class Plugin:
         except Exception:
             decky_plugin.logger.exception("could not")
             return -1
+
+    async def was_rescued(self):
+        if Plugin._rescued:
+            Plugin._rescued = False
+            return True
+        return False
 
     async def set_current_app_name(self, app_name):
         decky_plugin.logger.info("setting app name to " + app_name)

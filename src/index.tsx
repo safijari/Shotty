@@ -47,6 +47,10 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   );
 };
 
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
 export default definePlugin((serverApi: ServerAPI) => {
   let input_register = window.SteamClient.Input.RegisterForControllerStateChanges(async (val: any[]) => {
       /*
@@ -78,9 +82,28 @@ export default definePlugin((serverApi: ServerAPI) => {
           if (!app_name) {
             app_name = "Steam Client";
           }
-          await serverApi.callPluginMethod("set_current_app_name", { app_name: app_name})
-          console.log("in shortcut and set app name to " + app_name);
-          console.log(app_name);
+          await serverApi.callPluginMethod("set_current_app_name", { app_name: app_name});
+          await delay(3000);
+          let res = await serverApi.callPluginMethod("was_rescued", {});
+          if (res.result) {
+            await serverApi.toaster.toast({
+              title: "Shotty",
+              body: "Rescued Screenshot",
+              duration: 1000,
+              critical: true
+            })
+          } else {
+            await delay(1000);
+            let res = await serverApi.callPluginMethod("was_rescued", {});
+            if (res.result) {
+              await serverApi.toaster.toast({
+                title: "Shotty",
+                body: "Rescued Screenshot",
+                duration: 1000,
+                critical: true
+              })
+            }
+          }
         }
       }
   });
