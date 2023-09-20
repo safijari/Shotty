@@ -111,18 +111,10 @@ export default definePlugin((serverApi: ServerAPI) => {
   let screenshot_register = window.SteamClient.GameSessions.RegisterForScreenshotNotification(async (data: any) => {
     console.log(data);
     let res = await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl});
-    if (res.result) {
+    if (!res.result) {
       await serverApi.toaster.toast({
         title: "Shotty",
-        body: "Screenshot Symlinked",
-        duration: 1000,
-        critical: true
-      })
-    }
-    else {
-      await serverApi.toaster.toast({
-        title: "Shotty",
-        body: "Something went wrong with the screenshot",
+        body: "Failed to symlink screenshot",
         duration: 1000,
         critical: true
       })

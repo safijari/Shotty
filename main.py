@@ -11,6 +11,7 @@ import shutil
 import time
 import asyncio
 
+
 class Plugin:
     # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
     _id_map = {}
@@ -30,13 +31,19 @@ class Plugin:
                 if os.path.exists(png_path):
                     dt = time.time() - os.path.getmtime(png_path)
                     if dt > 2:
-                        path = Plugin._dump_folder / Plugin._current_app_name / (str(int(time.time())) + ".png")
+                        path = (
+                            Plugin._dump_folder
+                            / Plugin._current_app_name.replace(":", " ")
+                            / (str(int(time.time())) + ".png")
+                        )
                         path.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy(png_path, path)
                         shutil.copy(png_path, self._dump_folder / "most_recent.jpg")
                         os.unlink(png_path)
                         os.unlink(raw_path)
-                        decky_plugin.logger.info(f"Rescued screenshot for {Plugin._current_app_name}")
+                        decky_plugin.logger.info(
+                            f"Rescued screenshot for {Plugin._current_app_name}"
+                        )
                         Plugin._rescued = True
             except Exception:
                 decky_plugin.logger.exception("watchdog")
@@ -130,7 +137,7 @@ class Plugin:
 
     def make_path(self, app_id, fname):
         app_name = Plugin.get_app_name(self, app_id) or str(app_id)
-        final_path = self._dump_folder / app_name / fname
+        final_path = self._dump_folder / app_name.replace(":", " ") / fname
         final_path.parent.mkdir(parents=True, exist_ok=True)
         return final_path
 
@@ -142,9 +149,7 @@ class Plugin:
             self._id_map = {
                 i["appid"]: i["name"]
                 for i in json.load(
-                    open(
-                        Path(decky_plugin.DECKY_PLUGIN_DIR) / "appidmap.json"
-                    )
+                    open(Path(decky_plugin.DECKY_PLUGIN_DIR) / "appidmap.json")
                 )["applist"]["apps"]
             }
             decky_plugin.logger.info("Initialized")
