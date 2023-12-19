@@ -5,8 +5,8 @@ dependencies:
     specifier: 'link:'
     version: 'link:'
   decky-frontend-lib:
-    specifier: ^3.20.7
-    version: 3.21.0
+    specifier: ^3.24.1
+    version: 3.24.1
   react-icons:
     specifier: ^4.4.0
     version: 4.4.0
@@ -433,8 +433,8 @@ packages:
     resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
     dev: true
 
-  /decky-frontend-lib@3.21.0:
-    resolution: {integrity: sha512-BZY+F9HKhjF0zthoBdQxbluZ/37UyjlzCCpcC6dQfOeAAPmjFDATs/FF/n9qo9B+NMepgWUXpStZR0becE9EOw==}
+  /decky-frontend-lib@3.24.1:
+    resolution: {integrity: sha512-VGxLTPetxx/pQVC+t8odTHrwQAh7uy4bO2Od2gGWSTfmUUoxtAcEtiXGyE9mKsoD6t7QNHrGvgXn78sf2i/IeQ==}
     dev: false
 
   /deepmerge@4.2.2:
@@ -517,8 +517,8 @@ packages:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
     dev: true
 
-  /fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+  /fsevents@2.3.3:
+    resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
     requiresBuild: true
@@ -742,7 +742,7 @@ packages:
     engines: {node: '>=10.0.0'}
     hasBin: true
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: 2.3.3
     dev: true
 
   /safe-buffer@5.2.1:
