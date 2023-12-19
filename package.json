@@ -1,6 +1,6 @@
 {
   "name": "Shotty",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A plugin for copying over screenshots to the Pictures folder",
   "scripts": {
     "build": "shx rm -rf dist && rollup -c",
