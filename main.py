@@ -94,7 +94,6 @@ class Plugin:
             return False
 
     async def sdsa_classic(self):
-        id_map = self._id_map
         path = Path.home() / ".local/share/Steam/userdata"
         files = list(path.glob("**/screenshots/*.jpg"))
 
