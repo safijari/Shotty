@@ -1,15 +1,11 @@
-import os
-
-from click import get_app_dir
-import decky_plugin
-from pathlib import Path
+import asyncio
 import json
 import os
-import subprocess
-import sys
 import shutil
 import time
-import asyncio
+from pathlib import Path
+
+import decky_plugin
 
 
 class Plugin:
