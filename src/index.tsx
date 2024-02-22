@@ -23,12 +23,15 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
     setButtonEnabled(false);
     setFeedbackText("Aggregating...");
     let store: any = window.appStore;
-    const result = await serverAPI.callPluginMethod(
-      "aggregate_all", { allapps: store.allApps.map((i: any) => [i.appid, i.display_name])});
+    const result = await serverAPI.callPluginMethod("aggregate_all", {
+      allapps: store.allApps.map((i: any) => [i.appid, i.display_name]),
+    });
     if (result.result >= 0) {
       setFeedbackText("Copied " + result.result + " files");
     } else {
-      setFeedbackText("Something went wrong during aggregation. Please check logs.");
+      setFeedbackText(
+        "Something went wrong during aggregation. Please check logs.",
+      );
     }
     setButtonEnabled(true);
   };
@@ -39,7 +42,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
   return (
     <PanelSection title="Panel Section">
       <PanelSectionRow>
-        <ButtonItem layout="below" onClick={onClick} disabled={!buttonEnabled}>Aggregate!</ButtonItem>
+        <ButtonItem layout="below" onClick={onClick} disabled={!buttonEnabled}>
+          Aggregate!
+        </ButtonItem>
       </PanelSectionRow>
       <PanelSectionRow>
         <div>{feedbackText}</div>
@@ -50,19 +55,27 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ serverAPI }) => {
 
 export default definePlugin((serverApi: ServerAPI) => {
   let store: any = window.appStore;
-  serverApi.callPluginMethod("set_id_map_fronend", {allapps: store.allApps.map((i: any) => [i.appid, i.display_name])});
-  let screenshot_register = window.SteamClient.GameSessions.RegisterForScreenshotNotification(async (data: any) => {
-    console.log(data);
-    let res = await serverApi.callPluginMethod("copy_screenshot", { app_id: data.unAppID, url: data.details.strUrl});
-    if (!res.result) {
-      await serverApi.toaster.toast({
-        title: "Shotty",
-        body: "Failed to symlink screenshot",
-        duration: 1000,
-        critical: true
-      })
-    }
+  serverApi.callPluginMethod("set_id_map_fronend", {
+    allapps: store.allApps.map((i: any) => [i.appid, i.display_name]),
   });
+  let screenshot_register =
+    window.SteamClient.GameSessions.RegisterForScreenshotNotification(
+      async (data: any) => {
+        console.log(data);
+        let res = await serverApi.callPluginMethod("copy_screenshot", {
+          app_id: data.unAppID,
+          url: data.details.strUrl,
+        });
+        if (!res.result) {
+          await serverApi.toaster.toast({
+            title: "Shotty",
+            body: "Failed to symlink screenshot",
+            duration: 1000,
+            critical: true,
+          });
+        }
+      },
+    );
 
   return {
     title: <div className={staticClasses.Title}>Screentshot Aggregator</div>,
