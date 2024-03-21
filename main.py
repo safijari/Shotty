@@ -1,15 +1,11 @@
-import os
-
-from click import get_app_dir
-import decky_plugin
-from pathlib import Path
+import asyncio
 import json
 import os
-import subprocess
-import sys
 import shutil
 import time
-import asyncio
+from pathlib import Path
+
+import decky_plugin
 
 
 class Plugin:
@@ -98,7 +94,6 @@ class Plugin:
             return False
 
     async def sdsa_classic(self):
-        id_map = self._id_map
         path = Path.home() / ".local/share/Steam/userdata"
         files = list(path.glob("**/screenshots/*.jpg"))
 
